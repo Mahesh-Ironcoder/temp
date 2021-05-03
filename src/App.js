@@ -2,14 +2,12 @@ import "./App.css";
 import Login from "./components/login";
 import Home from "./components/Home";
 import Signup from "./components/Signup";
+import AppDrawer from "./components/AppDrawer";
+import Diet from "./components/Diet";
 
 import { useState, createContext } from "react";
 
-import {
-	Route,
-	Switch,
-	useHistory,
-} from "react-router-dom";
+import { Route, Switch, useHistory } from "react-router-dom";
 import {
 	AppBar,
 	Toolbar,
@@ -18,8 +16,11 @@ import {
 	Button,
 	CssBaseline,
 	makeStyles,
+	IconButton,
 } from "@material-ui/core";
+
 import ProtectedRoute from "./components/ProtectedRoute";
+import MenuIcon from "@material-ui/icons/Menu";
 
 export const AppContext = createContext("");
 
@@ -33,6 +34,7 @@ const useStyles = makeStyles((theme) => {
 
 function App() {
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
+	const [drawerOpen, setIsDrawerOpen] = useState(false);
 
 	let history = useHistory();
 	console.log(history);
@@ -49,6 +51,8 @@ function App() {
 			body: formdata,
 			redirect: "follow",
 		};
+
+
 
 		fetch("/login", requestOptions)
 			.then((resp) => resp.json())
@@ -69,6 +73,13 @@ function App() {
 		setIsLoggedIn(false);
 	};
 
+	const handleDrawerOpen = () => {
+		setIsDrawerOpen(true);
+	};
+	const handleDrawerClose = () => {
+		setIsDrawerOpen(false);
+	};
+
 	const classes = useStyles();
 
 	return (
@@ -78,6 +89,15 @@ function App() {
 			<Grid container direction='column'>
 				<AppBar position='static'>
 					<Toolbar>
+						<IconButton
+							color='inherit'
+							aria-label='open drawer'
+							onClick={handleDrawerOpen}
+							edge='start'
+							className={classes.menuButton}
+						>
+							<MenuIcon />
+						</IconButton>
 						<Typography variant='h4' className={classes.title}>
 							Healthfy
 						</Typography>
@@ -91,6 +111,7 @@ function App() {
 						</Button>
 					</Toolbar>
 				</AppBar>
+				<AppDrawer open={drawerOpen} onClose={handleDrawerClose} />
 				<Switch>
 					<Route path='/' exact>
 						<Login />
@@ -100,6 +121,9 @@ function App() {
 					</Route>
 					<ProtectedRoute path='/home' exact>
 						<Home />
+					</ProtectedRoute>
+					<ProtectedRoute path='/diet' exact>
+						<Diet />
 					</ProtectedRoute>
 					<Route path='*'>
 						<div>403 error</div>

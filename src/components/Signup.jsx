@@ -64,6 +64,7 @@ function TextInput(props) {
 		startIcon: MyIcon,
 		type: textType,
 		label: labelFor,
+		fullWidth,
 	} = props;
 	return (
 		<div
@@ -84,7 +85,7 @@ function TextInput(props) {
 				}}
 				label={labelFor}
 				variant='filled'
-				fullWidth
+				fullWidth={fullWidth}
 				required
 				color='secondary'
 				style={{ marginLeft: 10 }}
@@ -129,6 +130,7 @@ export default function Signup() {
 								onTextChange={(value) => setUsername(value)}
 								className={classes.textinputStyle}
 								startIcon={PersonOutlineOutlinedIcon}
+								fullWidth
 							/>
 							<TextInput
 								value={password}
@@ -136,6 +138,7 @@ export default function Signup() {
 								onTextChange={(value) => setPassword(value)}
 								className={classes.textinputStyle}
 								startIcon={LockOutlinedIcon}
+								fullWidth
 							/>
 							<TextInput
 								value={password2}
@@ -143,6 +146,7 @@ export default function Signup() {
 								onTextChange={(value) => setPassword2(value)}
 								className={classes.textinputStyle}
 								startIcon={LockOutlinedIcon}
+								fullWidth
 							/>
 							<Button
 								variant='contained'
