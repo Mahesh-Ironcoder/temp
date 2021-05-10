@@ -13,7 +13,7 @@ import {
 } from "@material-ui/core";
 import LocalHospitalIcon from "@material-ui/icons/LocalHospital";
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
-import { AppContext } from "../App.js";
+import { AuthContext } from "../contexts/AuthContext.js";
 import { useHistory } from "react-router";
 
 const useStyles = makeStyles((theme) => ({
@@ -52,11 +52,13 @@ export default function Login(props) {
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
 
-	const { login } = useContext(AppContext);
-	const history = useHistory();
+	const { login } = useContext(AuthContext);
+
+	// console.log("Login props: ", props);
+
+	let history = useHistory();
 
 	const classes = useStyles();
-
 	return (
 		<Grid container direction='row' justify='center' alignItems='center'>
 			<Grid item xs={1} sm={4} />
@@ -108,7 +110,18 @@ export default function Login(props) {
 								type='submit'
 								onClick={(e) => {
 									login({ user: username, pass: password });
-									history.push("/home");
+									let routeState = props.location.state;
+									// console.log(
+									// 	"State of route from context: ",
+									// 	routeState
+									// );
+									if (routeState && routeState.from) {
+										history.push(routeState.from.pathname);
+									}
+									// else go to home
+									else {
+										history.push("/");
+									}
 								}}
 							>
 								Log in

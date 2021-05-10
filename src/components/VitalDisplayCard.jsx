@@ -10,8 +10,9 @@ import {
 
 const useStyles = makeStyles((theme) => ({
 	root: {
-		minWidth: 275,
-		margin: 16,
+		minWidth: 195,
+		minHeight: 150,
+		// margin: 16,
 	},
 }));
 
@@ -49,7 +50,7 @@ export default function VitalDisplayCard(props) {
 	}
 	return (
 		<Card elevation={5} className={classes.root}>
-			<CardHeader title={"Glucose"} />
+			<CardHeader title={props.title} />
 			<CardContent>
 				{data} {!props.noUnits && "mg/dL"}
 			</CardContent>

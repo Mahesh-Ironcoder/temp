@@ -1,5 +1,5 @@
 import React from "react";
-import { ClickAwayListener, Drawer, makeStyles } from "@material-ui/core";
+import { Drawer, makeStyles } from "@material-ui/core";
 import { NavLink } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => {
@@ -55,20 +55,33 @@ function AppDrawer(props) {
 				<div onClick={onClose} className={classes.closeBtn}>
 					X
 				</div>
-				<NavLink
-					to='/'
-					activeClassName={classes.activeItem}
-					className={classes.drawerItem}
-					style={{ fontSize: 18, textDecoration: "none" }}
-				>
-					Home
-				</NavLink>
+				<div className={classes.drawerItem}>
+					<NavLink
+						to='/'
+						// activeClassName={classes.activeItem}
+						// className={classes.drawerItem}
+						style={{ fontSize: 18, textDecoration: "none" }}
+						onClick={onClose}
+					>
+						Home
+					</NavLink>
+				</div>
 				<div className={classes.drawerItem}>
 					<NavLink
 						to='/diet'
 						style={{ fontSize: 18, textDecoration: "none" }}
+						onClick={onClose}
 					>
 						Diet
+					</NavLink>
+				</div>
+				<div className={classes.drawerItem}>
+					<NavLink
+						to='/devices'
+						style={{ fontSize: 18, textDecoration: "none" }}
+						onClick={onClose}
+					>
+						Devices
 					</NavLink>
 				</div>
 			</div>
