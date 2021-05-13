@@ -1,6 +1,8 @@
 import { Grid, makeStyles } from "@material-ui/core";
 
+import firebase from "firebase/app";
 import "firebase/auth";
+import "firebase/firestore";
 
 import React from "react";
 
@@ -8,9 +10,10 @@ import { useHistory } from "react-router";
 
 import { AuthContext } from "../contexts/AuthContext";
 import { BluetoothDeviceContext } from "../contexts/BluetoothDeviceContext";
-import VitalDisplayCard, { BorderLinearProgress } from "./VitalDisplayCard";
+import VitalDisplayCard from "./VitalDisplayCard";
 
-import { Chart } from "react-google-charts";
+import RTDataChart from "./RTDataChart";
+import CircularStatic from "./CircularProgressWithLabel";
 
 const useStyles = makeStyles((theme) => ({
 	appbarStyles: {
@@ -51,6 +54,10 @@ export default function Home(props) {
 
 	const { currUser } = React.useContext(AuthContext);
 	const { server } = React.useContext(BluetoothDeviceContext);
+	const db = firebase.firestore();
+
+	const glucoseDataRef = React.useRef(null);
+	const bpDataRef = React.useRef(null);
 
 	let history = useHistory();
 
@@ -70,19 +77,29 @@ export default function Home(props) {
 			fetch("/api/predict_glucose", requestOptions)
 				.then((response) => response.json())
 				.then((result) => {
-					// console.log(result);
-					setVitals({
-						...vitals,
-						glucose: parseInt(result.glucosePrediction),
-						// bp: "Sistole: 80 \n Diastole: 110",
-					});
+					console.log(result);
+					// setVitals({
+					// 	...vitals,
+					// 	glucose: parseInt(result.glucosePrediction),
+					// 	// bp: "Sistole: 80 \n Diastole: 110",
+					// });
 				})
 				.catch((error) =>
 					console.log("error in fetching glucose value", error)
 				);
 		},
-		[vitals.bp]
+		[vitals.bp, currUser.uid]
 	);
+
+	const getSpo2Data = () => {
+		return parseInt(Math.random() * (100 - 85) + 85);
+	};
+	const getHeartRate = () => {
+		return parseInt(Math.random() * (100 - 50) + 50);
+	};
+	const getCholestrol = () => {
+		return parseInt(Math.random() * (100 - 50) + 50);
+	};
 
 	function handleCharacteristicValueChanged(e) {
 		// console.log(e.target.value.getUint8(0) + "%");
@@ -119,8 +136,75 @@ export default function Home(props) {
 		}
 	}
 
-	const toDataTable = (data)=>{
+	function handleNextData(doc) {
+		console.log("Listen from glucose: ");
+		let dataTable = [["Time", "Glucose"]];
+		if (doc.exists) {
+			let data = doc.data();
+			console.log("data", data);
+			let dataToX = Object.keys(data);
+			let dataToY = Object.values(data);
+			let dataLength = dataToX.length;
+			let onlyData = [];
+			for (let i = 0; i < dataLength && i < 10; i++) {
+				onlyData.push([dataToX[i], parseInt(dataToY[i])]);
+			}
+			if (onlyData.length === 0) dataTable.push([["19:10:05", 70]]);
 
+			onlyData.sort((a, b) => {
+				return new Date(b[0]) - new Date(a[0]);
+			});
+			onlyData = onlyData.reverse();
+			console.log("Only data: ", onlyData);
+			setVitals({ ...vitals, glucose: parseInt(onlyData[9][1]) });
+			dataTable = [["Time", "Glucose"], ...onlyData];
+		} else {
+			console.log("NO such doc");
+		}
+		glucoseDataRef.current = dataTable;
+	}
+	function handleSnapshotError(err) {
+		console.log("Error in snapshot: ", err);
+	}
+
+	function handleNextBPData(doc) {
+		let dataTable = [["Time", "Diastole", "Systole"]];
+		if (doc.exists) {
+			let data = doc.data();
+			console.log("data", data);
+			let dataToX = Object.keys(data);
+			let dataToY = Object.values(data);
+			let y1 = [],
+				y2 = [];
+			dataToY.forEach((y) => {
+				y1.push(y["diastole"]);
+				y2.push(y["systole"]);
+			});
+			let dataLength = dataToX.length;
+			let onlyData = [];
+			for (let i = 0; i < dataLength && i < 10; i++) {
+				onlyData.push([dataToX[i], parseInt(y1[i]), parseInt(y2[i])]);
+			}
+			if (onlyData.length === 0) {
+				dataTable.push([["19:10:05", 80, 120]]);
+				dataTable.push([["19:10:05", 80, 120]]);
+			}
+			onlyData.sort((a, b) => {
+				return new Date(b[0]) - new Date(a[0]);
+			});
+			// setVitals({
+			// 	...vitals,
+			// 	bp: `Diastole: ${parseInt(onlyData[9][1])} Sistole: ${parseInt(
+			// 		onlyData[9][2]
+			// 	)}`,
+			// });
+			onlyData = onlyData.reverse();
+			console.log("Only data: ", onlyData);
+			dataTable = [["Time", "Diastole", "Systole"], ...onlyData];
+		} else {
+			console.log("NO such doc");
+		}
+		bpDataRef.current = dataTable;
 	}
 
 	React.useEffect(() => {
@@ -149,6 +233,7 @@ export default function Home(props) {
 			alert("No bluetooth Devices found...Please connect to one");
 			history.push("/devices");
 		}
+		// toDataTable();
 		return () => {
 			if (bpm) {
 				bpm.removeEventListener("characteristicvaluechanged", () => {
@@ -179,6 +264,34 @@ export default function Home(props) {
 		// 	);
 	}, [vitals.bp, fetchGlucose]);
 
+	React.useEffect(() => {
+		let today = today_date();
+		console.log("today: ", today);
+		const gt_ref = db
+			.collection("userProfiles")
+			.doc(currUser.uid)
+			.collection("glucose_trends")
+			.doc(today);
+		let unsubscribeGt = gt_ref.onSnapshot(
+			handleNextData,
+			handleSnapshotError
+		);
+		const bp_ref = db
+			.collection("userProfiles")
+			.doc(currUser.uid)
+			.collection("bp_trends")
+			.doc(today);
+		let unsubscribeBP = bp_ref.onSnapshot(
+			handleNextBPData,
+			handleSnapshotError
+		);
+		return () => {
+			console.log("Unsubscribing snapshot listener: ");
+			unsubscribeGt();
+			unsubscribeBP();
+		};
+	}, [currUser.uid, db]);
+
 	const classes = useStyles();
 	return (
 		<Grid
@@ -186,67 +299,94 @@ export default function Home(props) {
 			direction='column'
 			alignItems='flex-start'
 			className={classes.gridContainer}
+			spacing={1}
 		>
 			<Grid
 				item
 				container
 				direction='row'
-				alignItems='stretch'
+				justify='space-between'
+				alignItems='center'
 				spacing={2}
 			>
-				<Grid item xs={12} sm={4}>
-					<VitalDisplayCard
-						data={vitals.bp}
-						title={"Blood Pressure"}
-						noUnits
+				<Grid item xs={12} sm={4} zeroMinWidth>
+					{/* <RTDataChart db={db} currUser={currUser} pV={vitals.bp} /> */}
+					<RTDataChart
+						data={glucoseDataRef.current}
+						title='Glucose trends'
 					/>
 				</Grid>
-				<Grid item xs={12} sm={4}>
-					<VitalDisplayCard data={vitals.glucose} title={"Glucose"} />
-				</Grid>
-				<Grid item xs={12} sm={4}>
-					<Chart
-						width={"500px"}
-						height={"300px"}
-						chartType='AreaChart'
-						loader={<div>Loading Chart</div>}
-						data={[
-							["Year", "Sales", "Expenses"],
-							["2013", 1000, 400],
-							["2014", 1170, 460],
-							["2015", 660, 1120],
-							["2016", 1030, 540],
-						]}
-						options={{
-							title: "Blood Pressure Trends",
-							hAxis: {
-								title: "Time",
-								titleTextStyle: { color: "#333" },
-							},
-							vAxis: { minValue: 0 },
-							// For the legend to fit, we make the chart area smaller
-							chartArea: { width: "80%", height: "70%" },
-							// lineWidth: 25
-						}}
-						// For tests
-						rootProps={{ "data-testid": "1" }}
+				<Grid item xs={12} sm={4} zeroMinWidth>
+					{/* <RTDataChart db={db} currUser={currUser} pV={vitals.bp} /> */}
+					<RTDataChart
+						data={bpDataRef.current}
+						title='Blood Pressure trends'
 					/>
+				</Grid>
+
+				<Grid
+					item
+					container
+					xs={12}
+					sm={4}
+					direction='column'
+					justify='center'
+				>
+					<Grid item>
+						<VitalDisplayCard
+							data={vitals.glucose}
+							title={"Glucose"}
+						/>
+					</Grid>
+					<Grid item>
+						<VitalDisplayCard
+							data={vitals.bp}
+							title={"Blood Pressure"}
+							noUnits
+						/>
+					</Grid>
 				</Grid>
 			</Grid>
-			<Grid item container direction='column'>
-				<div className={classes.apd}>
+			<Grid item container direction='row' spacing={2} xs={12} sm>
+				{/* <div className={classes.apd}>
 					SpO2
 					<BorderLinearProgress variant='determinate' value={50} />
-				</div>
-				<div className={classes.apd}>
+				</div> */}
+				<Grid item xs={12} sm>
+					<CircularStatic
+						progressValue={getSpo2Data()}
+						title='SpO2'
+					/>
+				</Grid>
+				<Grid item xs={12} sm>
+					<CircularStatic
+						progressValue={getHeartRate()}
+						title='Heart Rate'
+						unit='bpm'
+					/>
+				</Grid>
+				<Grid item xs={12} sm>
+					<CircularStatic
+						progressValue={getCholestrol()}
+						title='Cholestrol'
+						unit='mg/dL'
+					/>
+				</Grid>
+				{/* <div className={classes.apd}>
 					Cholestrol
 					<BorderLinearProgress variant='determinate' value={50} />
 				</div>
 				<div className={classes.apd}>
 					Heamoglobin
 					<BorderLinearProgress variant='determinate' value={50} />
-				</div>
+				</div> */}
 			</Grid>
 		</Grid>
 	);
+}
+function today_date() {
+	let date = new Date();
+	let today = date.toLocaleDateString().split("/").reverse();
+	let todayDate = `${today[0]}-0${today[2]}-${today[1]}`;
+	return todayDate;
 }

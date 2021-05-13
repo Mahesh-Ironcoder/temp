@@ -63,7 +63,7 @@ function AppDrawer(props) {
 						style={{ fontSize: 18, textDecoration: "none" }}
 						onClick={onClose}
 					>
-						Home
+						Dashboard
 					</NavLink>
 				</div>
 				<div className={classes.drawerItem}>

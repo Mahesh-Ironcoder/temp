@@ -8,7 +8,7 @@ import Devices from "./components/Devices";
 
 import React, { useState, createContext } from "react";
 
-import { Route, Switch } from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { Grid, CssBaseline } from "@material-ui/core";
 
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -31,6 +31,7 @@ function App() {
 
 	return (
 		<AppContext.Provider value={{ handleDrawerOpen }}>
+			{/* <Router> */}
 			<AuthContextProvider>
 				<CssBaseline />
 
@@ -39,32 +40,30 @@ function App() {
 						<AppHeader />
 					</BluetoothDeviceContextProvider>
 					<AppDrawer open={drawerOpen} onClose={handleDrawerClose} />
-					<Switch>
-						<ProtectedRoute path='/' exact>
-							<BluetoothDeviceContextProvider>
+					<BluetoothDeviceContextProvider>
+						<Switch>
+							<ProtectedRoute path='/' exact>
 								<Home />
-							</BluetoothDeviceContextProvider>
-						</ProtectedRoute>
-						<Route path='/register' exact component={Signup} />
-						<Route path='/login' exact component={Login} />
-						{/* <Route path='/login' exact>
-							<Login />
-						</Route> */}
-						<ProtectedRoute path='/diet' exact>
-							<Diet />
-						</ProtectedRoute>
-						<ProtectedRoute path='/devices' exact>
-							<BluetoothDeviceContextProvider>
+							</ProtectedRoute>
+							<Route path='/register' exact component={Signup} />
+							<Route path='/login' exact component={Login} />
+							<ProtectedRoute path='/diet' exact>
+								<Diet />
+							</ProtectedRoute>
+							<ProtectedRoute path='/devices' exact>
+								{/* <BluetoothDeviceContextProvider> */}
 								<Devices />
-							</BluetoothDeviceContextProvider>
-						</ProtectedRoute>
+								{/* </BluetoothDeviceContextProvider> */}
+							</ProtectedRoute>
 
-						<Route path='*'>
-							<div>403 error</div>
-						</Route>
-					</Switch>
+							<Route path='*'>
+								<div>403 error</div>
+							</Route>
+						</Switch>
+					</BluetoothDeviceContextProvider>
 				</Grid>
 			</AuthContextProvider>
+			{/* </Router> */}
 		</AppContext.Provider>
 	);
 }

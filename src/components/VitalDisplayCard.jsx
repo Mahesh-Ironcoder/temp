@@ -10,9 +10,9 @@ import {
 
 const useStyles = makeStyles((theme) => ({
 	root: {
-		minWidth: 195,
-		minHeight: 150,
-		// margin: 16,
+		// minWidth: 195,
+		// minHeight: 150,
+		margin: 16,
 	},
 }));
 

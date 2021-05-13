@@ -5,6 +5,7 @@ import firebase from "firebase/app";
 import "firebase/auth";
 
 import { useHistory } from "react-router";
+import { findRenderedDOMComponentWithClass } from "react-dom/test-utils";
 
 export const AuthContext = createContext();
 
@@ -40,6 +41,7 @@ function AuthContextProvider(props) {
 							});
 					})
 					.catch((e) => console.log("Get Token id error: ", e));
+				history.push("/");
 			})
 			.catch((e) => {
 				console.log("Error in firebase auth: ", e);
@@ -82,13 +84,22 @@ function AuthContextProvider(props) {
 		firebase.initializeApp(firebaseConfig);
 	}, []);
 
-	React.useEffect(() => {
-		let currentUser = firebase.auth().currentUser;
-		// console.log("Current user: ", currentUser);
-		if (currentUser) {
-			setCurrUser(currentUser);
-		}
-	}, []);
+	// React.useEffect(() => {
+	// 	// let currentUser = firebase.auth().currentUser;
+	// 	// // console.log("Current user: ", currentUser);
+	// 	// if (currentUser) {
+	// 	// 	setCurrUser(currentUser);
+	// 	// }
+	// 	let sessionId = document.cookie.split("=")[1];
+	// 	fetch("http://127.0.0.1:5000/api/session_logout", {
+	// 		mode: "cors",
+	// 	})
+	// 		.then((resp) => resp.json())
+	// 		.then((body) => {
+	// 			console.log(body);
+	// 			setIsLogin(body.verified);
+	// 		});
+	// }, []);
 
 	return (
 		<AuthContext.Provider value={{ isLogin, currUser, login, logout }}>

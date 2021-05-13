@@ -1,11 +1,13 @@
 import {
 	Box,
 	Button,
+	Container,
 	Grid,
 	IconButton,
 	makeStyles,
 	Paper,
 	Typography,
+	CircularProgress,
 } from "@material-ui/core";
 import React from "react";
 
@@ -88,46 +90,24 @@ function Devices() {
 
 	const [deviceChar, setDeviceChar] = React.useState("");
 	const [charValue, setCharValue] = React.useState("");
+	const [loading, setLoading] = React.useState(false);
 
 	const classes = useStyles();
 
-	const handleCharacteristicValueChanged = (event) => {
-		// console.log(event.target.value.getUint8(0) + "%");
-		setCharValue(event.target.value.getUint8(0));
-	};
-
 	const handleDisconnect = () => {
-		// (async () => {
-		// 	if (device) {
-		// 		try {
-		// 			await device.gatt.disconnect();
-		// 			setDeviceChar("");
-		// 			setCharValue("");
-		// 		} catch (e) {
-		// 			console.error(
-		// 				"Error in connecting to bluetooth device: ",
-		// 				e
-		// 			);
-		// 		}
-		// 	}
-		// })();
 		disconnect();
 		setDeviceChar("");
 		setCharValue("");
 	};
 
 	React.useEffect(() => {
-		console.log("effect due to device");
+		// console.log("effect due to device");
 		(async () => {
 			if (device && server) {
+				setLoading(true);
 				try {
-					console.log("Device: ", device);
-					// device.addEventListener(
-					// 	"gattserverdisconnected",
-					// 	onDisconnect
-					// );
-					// const server = await device.gatt.connect();
-					console.log("Server: ", server);
+					// console.log("Device: ", device);
+					// console.log("Server: ", server);
 
 					const service = await server.getPrimaryService(
 						"blood_pressure"
@@ -135,14 +115,30 @@ function Devices() {
 					const char = await service.getCharacteristic(
 						"blood_pressure_measurement"
 					);
-					// const chs = await service.getCharacteristics();
-					console.log(char);
+					// console.log(char);
 					setDeviceChar(char);
+					// if (char) {
+					// 	try {
+					// 		let reading = await char.readValue();
+					// 		let readValue = reading.getUint16();
+					// 		// console.log("from hook - 0 ", readValue + "%");
+					// 		// console.log("from hook -2", readValue & 0xff, " %");
+					// 		// console.log("from hook -3", (readValue >> 8) & 0xff, " %");
+					// 		setCharValue(readValue.getUint8(0));
+					// 	} catch (e) {
+					// 		console.error(
+					// 			"Error in getting charactersitics from bluetooth device: ",
+					// 			e
+					// 		);
+					// 	}
+					// }
+					// setLoading(false);
 				} catch (e) {
 					console.error(
 						"Error in connecting to bluetooth device: ",
 						e
 					);
+					setLoading(false);
 				}
 			}
 		})();
@@ -152,26 +148,39 @@ function Devices() {
 		(async () => {
 			if (deviceChar) {
 				try {
-					// deviceChar.startNotifications();
-					// deviceChar.addEventListener(
-					// 	"characteristicvaluechanged",
-					// 	handleCharacteristicValueChanged
-					// );
 					let reading = await deviceChar.readValue();
 					let readValue = reading.getUint16();
-					console.log("from hook - 0 ", readValue + "%");
-					console.log("from hook -2", readValue & 0xff, " %");
-					console.log("from hook -3", (readValue >> 8) & 0xff, " %");
-					setCharValue(reading.getUint8(0));
+					// console.log("from hook - 0 ", readValue + "%");
+					// console.log("from hook -2", readValue & 0xff, " %");
+					// console.log("from hook -3", (readValue >> 8) & 0xff, " %");
+					setCharValue((readValue >> 8) & 0xff);
+					setLoading(false);
 				} catch (e) {
 					console.error(
 						"Error in getting charactersitics from bluetooth device: ",
 						e
 					);
+					setLoading(false);
 				}
 			}
+			setLoading(false);
 		})();
 	}, [deviceChar]);
+
+	if (loading) {
+		return (
+			<Container
+				style={{
+					height: "90vh",
+					display: "flex",
+					justifyContent: "center",
+					alignItems: "center",
+				}}
+			>
+				<CircularProgress color='secondary' size={100} />
+			</Container>
+		);
+	}
 
 	return (
 		<Grid

@@ -623,45 +623,10 @@ const yupValidationScheme = yup.object({
 	photo: yup.string().required("Required"),
 });
 
-function reducer(state, action) {
-	switch (action.type) {
-		case "setEmail":
-			return { ...state, email: action.payload };
-		case "setPhone":
-			return { ...state, phone: action.payload };
-		case "setPassword":
-			return { ...state, password: action.payload };
-		case "setPassword2":
-			return { ...state, password2: action.payload };
-		case "setName":
-			return {
-				...state,
-				name: action.payload.first
-					? { ...state.name, first: action.payload.first }
-					: { ...state.name, last: action.payload.last },
-			};
-		case "setBirthDate":
-			return { ...state, birthDate: action.payload };
-		case "setHeight":
-			return { ...state, height: action.payload };
-		case "setWeight":
-			return { ...state, weight: action.payload };
-		// case "setPhoto":
-		// 	return { ...state, weight: action.payload };
-		default:
-			return state;
-	}
-}
+
 
 export default function Signup() {
-	// const [phone, setPhone] = React.useState("");
-	// const [email, setEmail] = React.useState("");
-	// const [password, setPassword] = React.useState("");
-	// const [password2, setPassword2] = React.useState("");
-	// const [name, setName] = React.useState();
-	// const [birthDate, setBirthDate] = React.useState();
-	// const [weight, setWeight] = React.useState("");
-	// const [height, setHeight] = React.useState("");
+
 
 	const handleRegister = (values) => {
 		// if (values.password !== values.password2) {
@@ -671,8 +636,6 @@ export default function Signup() {
 		alert(JSON.stringify(values, null, 2));
 		// let userDetails = { email, password, dn: `${name.first} ${name.last}` };
 	};
-
-	// const [newUser, dispatch] = React.useReducer(reducer, initialState);
 
 	const formik = useFormik({
 		initialValues: initialState,
