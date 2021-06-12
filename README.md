@@ -2,7 +2,7 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-# ! Note: The app is still under the development phase and !
+# ! Note: The app is still under the development phase !
 
 ## Available Scripts
 
