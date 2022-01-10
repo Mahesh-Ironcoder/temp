@@ -48,8 +48,7 @@ function AppDrawer(props) {
 			className={classes.drawer}
 			classes={{
 				paper: classes.drawerPaper,
-			}}
-		>
+			}}>
 			{/* <ClickAwayListener onClickAway={onClose}> */}
 			<div className={classes.drawerConatiner}>
 				<div onClick={onClose} className={classes.closeBtn}>
@@ -60,28 +59,9 @@ function AppDrawer(props) {
 						to='/'
 						// activeClassName={classes.activeItem}
 						// className={classes.drawerItem}
-						style={{ fontSize: 18, textDecoration: "none" }}
-						onClick={onClose}
-					>
-						Dashboard
-					</NavLink>
-				</div>
-				<div className={classes.drawerItem}>
-					<NavLink
-						to='/diet'
-						style={{ fontSize: 18, textDecoration: "none" }}
-						onClick={onClose}
-					>
-						Diet
-					</NavLink>
-				</div>
-				<div className={classes.drawerItem}>
-					<NavLink
-						to='/devices'
-						style={{ fontSize: 18, textDecoration: "none" }}
-						onClick={onClose}
-					>
-						Devices
+						style={{ fontSize: 18, textDecoration: 'none' }}
+						onClick={onClose}>
+						Home
 					</NavLink>
 				</div>
 			</div>

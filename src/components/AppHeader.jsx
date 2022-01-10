@@ -56,13 +56,11 @@ function AppHeader() {
 
 	const { pathname } = location;
 
-	const splitLocation = pathname.split("/");
+	const splitLocation = pathname.split('/');
 	const { handleDrawerOpen } = useContext(AppContext);
-	const { disconnect } = useContext(BluetoothDeviceContext);
 	let history = useHistory();
 	const handleLogout = () => {
 		logout();
-		disconnect();
 	};
 	return (
 		<AppBar position='static'>
@@ -72,57 +70,30 @@ function AppHeader() {
 					aria-label='open drawer'
 					onClick={handleDrawerOpen}
 					edge='start'
-					className={classes.menuButton}
-				>
+					className={classes.menuButton}>
 					<MenuIcon />
 				</IconButton>
 				<Typography variant='h4' className={classes.title}>
-					Healthfy
+					Muster
 				</Typography>
 				{isLogin ? (
 					<>
 						<Link
 							className={
-								splitLocation[1] === ""
-									? classes.navlinkActive
-									: classes.navlink
+								splitLocation[1] === '' ? classes.navlinkActive : classes.navlink
 							}
 							underline='none'
-							href='/'
-						>
-							Dashboard
-						</Link>
-						<Link
-							className={
-								splitLocation[1] === "diet"
-									? classes.navlinkActive
-									: classes.navlink
-							}
-							underline='none'
-							href='/diet'
-						>
-							Diet
-						</Link>
-						<Link
-							className={
-								splitLocation[1] === "devices"
-									? classes.navlinkActive
-									: classes.navlink
-							}
-							underline='none'
-							href='/devices'
-						>
-							Devices
+							href='/'>
+							Home
 						</Link>
 					</>
 				) : null}
 				<Button
 					variant='contained'
 					onClick={() => {
-						isLogin ? handleLogout() : history.push("/");
-					}}
-				>
-					{isLogin ? "Log out" : "Login"}
+						isLogin ? handleLogout() : history.push('/');
+					}}>
+					{isLogin ? 'Log out' : 'Login'}
 				</Button>
 			</Toolbar>
 		</AppBar>
